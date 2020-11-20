@@ -1,6 +1,6 @@
 import { StatusBar } from 'expo-status-bar';
 import React from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, View, ActivityIndicator } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import Ionicons from '@expo/vector-icons/Ionicons';
@@ -8,7 +8,7 @@ import HomeTab from './tabs/HomeTab';
 import MyPlacesTab from './tabs/MyPlacesTab';
 import WeatherTab from './tabs/WeatherTab';
 import * as Location from 'expo-location';
-import { openCageKey, openWeatherKey } from './keys.js';
+import { openCageKey, openWeatherKey } from './tabs/keys.js';
 
 const Tab = createBottomTabNavigator();
 export default function App() {
@@ -20,8 +20,7 @@ export default function App() {
   const [errorMsg, setErrorMsg] = React.useState(null);
 
   let iso_code = data && data.results[0].annotations.currency.iso_code;
-  let { rates } = currency && currency;
-  let conversion = rates && rates[Object.keys(rates)[0]];
+  let rates = currency && currency.rates[Object.keys(currency.rates)[0]];
 
   //Function to get gps location
   React.useEffect(() => {
@@ -31,37 +30,36 @@ export default function App() {
         setErrorMsg('Permission to access location was denied');
       }
       let location = await Location.getCurrentPositionAsync({ Accuracy: 6 });
-      setLatitude(location.coords.latitude);
-      setLongitude(location.coords.longitude);
+
+      setLatitude(location && location.coords.latitude);
+      setLongitude(location && location.coords.longitude);
     })();
   }, []);
 
   //Function to fetch currency symbol
   React.useEffect(() => {
-    fetch(
-      `https://api.opencagedata.com/geocode/v1/json?q=${lat}+${lng}&key=${openCageKey}`,
-    )
-      .then((response) => response.json())
-      .then((json) => setData(json));
-    console.log(data);
-  }, [lng]);
+    if (lat && lng) {
+      fetch(
+        `https://api.opencagedata.com/geocode/v1/json?q=${lat}+${lng}&key=${openCageKey}`,
+      )
+        .then((response) => response.json())
+        .then((json) => setData(json));
+    }
+  }, [lat, lng]);
 
   React.useEffect(() => {
     fetch(`https://api.exchangeratesapi.io/latest?base=USD&symbols=${iso_code}`)
       .then((response) => response.json())
       .then((json) => setCurrency(json));
-    console.log(iso_code);
   }, [iso_code]);
 
   React.useEffect(() => {
     fetch(
-      `api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${openWeatherKey}`,
+      `http://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lng}&units=metric&appid=${openWeatherKey}`,
     )
       .then((response) => response.json())
       .then((json) => setWeather(json));
-    console.log(data);
-  }, [lng]);
-
+  }, [lat && lng]);
   return (
     <NavigationContainer>
       <Tab.Navigator
@@ -81,7 +79,7 @@ export default function App() {
                 name={iconName}
                 size={size}
                 color={color}
-                rate={conversion}
+                rate={rates}
               />
             );
           },
@@ -94,10 +92,18 @@ export default function App() {
       >
         <Tab.Screen
           name="Home"
-          children={() => <HomeTab geo={data} rate={conversion} />}
+          children={() => <HomeTab geo={data} rate={rates} />}
         />
-        <Tab.Screen name="Weather" component={WeatherTab} />
-        <Tab.Screen name="My Places" component={MyPlacesTab} />
+        <Tab.Screen
+          name="Weather"
+          children={() => <WeatherTab weather={weather} />}
+        />
+        <Tab.Screen
+          name="My Places"
+          children={() => (
+            <MyPlacesTab geo={data} weather={weather} rate={rates} />
+          )}
+        />
       </Tab.Navigator>
     </NavigationContainer>
   );
