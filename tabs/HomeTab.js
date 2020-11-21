@@ -1,33 +1,30 @@
 import React from 'react';
-import { StyleSheet, Text, View, TextInput, Button } from 'react-native';
+import { Text, View } from 'react-native';
 
 const HomeTab = (props) => {
+  //variables which values are assigned from props
   const { results } = props.geo;
-  const { rate } = props;
-  const [total, setTotal] = React.useState('');
-  const [amount, setAmount] = React.useState('');
-  const county = results && results[0].components.county;
-  const city = results && results[0].components.city;
+  const { county, city } = results && results[0].components;
+  const { weather } = props && props;
 
-  let text = '';
-  if (!city && !county) {
-    text = 'Loading...';
-  }
+  //Function to get the day
+  const date = new Date().getDay();
+  const week = [
+    'Sunday',
+    'Monday',
+    'Tuesday',
+    'Wednesday',
+    'Thursday',
+    'Friday',
+    'Saturday',
+  ];
+  const day = week[date];
 
   return (
+    //Render the message on home tab
     <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-      <Text>Welcome to {text || county || city}</Text>
-      <TextInput
-        style={{ height: 40, borderColor: 'gray', borderWidth: 1, width: 70 }}
-        onChangeText={(amount) => setAmount(amount)}
-      />
-
-      <Button title="convert" onPress={() => setTotal(amount * rate)} />
-      <Text> {''}</Text>
-      <Text>
-        {total && total
-          ? total.toFixed(2) + results[0].annotations.currency.symbol
-          : 'Please, enter an amount (Number)'}
+      <Text style={{ fontSize: 23 }}>
+        {county || city}, {day}, {parseInt(weather && weather.main.temp)}°C
       </Text>
     </View>
   );
