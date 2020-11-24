@@ -3,8 +3,6 @@ import { StyleSheet, Text, View, ScrollView, Linking } from 'react-native';
 import { Card, Title, Paragraph, Button, FAB } from 'react-native-paper';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-import swal from 'sweetalert';
-
 const MyPlacesTab = (props) => {
   //Props variables
   let { rate, weather, geo, iso_code, lat, lng, photo } = props;
@@ -42,12 +40,12 @@ const MyPlacesTab = (props) => {
 
       //Add the new values into the localStorage
       await AsyncStorage.setItem('cities', JSON.stringify(cities));
-      swal('Good job!', 'City saved successfully', 'success');
+      alert('Data saved successfully');
 
       //Trigger the function to show the new data
       showPlaces();
     } catch (e) {
-      swal(e);
+      alert(e);
     }
   };
 
@@ -66,32 +64,18 @@ const MyPlacesTab = (props) => {
 
   //Function to remove an element of the array and set to localStorage
   const removeElement = async (index) => {
-    swal({
-      title: 'Are you sure?',
-      text: 'Once deleted, you will not be able to recover this item!',
-      icon: 'warning',
-      buttons: true,
-      dangerMode: true,
-    }).then(async (willDelete) => {
-      if (willDelete) {
-        //If the user presses yes, then it deletes the item
-        places.splice(index, 1);
-        await AsyncStorage.setItem('cities', JSON.stringify(places));
-        showPlaces();
-        swal('Your item has been deleted!', {
-          icon: 'success',
-        });
-      } else {
-        swal('Your item is safe :D');
-      }
-    });
+    //If the user presses yes, then it deletes the item
+    places.splice(index, 1);
+    await AsyncStorage.setItem('cities', JSON.stringify(places));
+    alert('Data deleted successfully');
+    showPlaces();
   };
 
   return (
     <>
       <ScrollView>
         {/*Map function to iterate the place's array from localStorage in a card, in the reverse way, so the last addeds show first*/}
-        {places.length ? (
+        {places && places.length ? (
           places
             .slice(0)
             .reverse()
@@ -102,7 +86,7 @@ const MyPlacesTab = (props) => {
                   marginBottom: 25,
                   marginLeft: `8%`,
                   marginRight: `8%`,
-                  marginTop: 10,
+                  marginTop: 30,
                   backgroundColor: '#F5F5F5',
                 }}
               >
