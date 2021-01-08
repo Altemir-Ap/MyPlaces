@@ -20,6 +20,8 @@ export default function App() {
   let [weather, setWeather] = React.useState('');
   const [photo, setPhoto] = React.useState('');
   const [errorMsg, setErrorMsg] = React.useState(null);
+  const [users, setUsers] = React.useState('');
+  const [menu, setMenu] = React.useState('');
 
   //Static variables
   let iso_code = data && data.results[0].annotations.currency.iso_code;
@@ -57,7 +59,6 @@ export default function App() {
       .then((response) => response.json())
       .then((json) => setCurrency(json));
   }, [iso_code]);
-
   //Promise to fetch data of weather conditions
   React.useEffect(() => {
     if (lat && lng) {
@@ -69,6 +70,18 @@ export default function App() {
     }
   }, [lat, lng]);
 
+  React.useEffect(() => {
+    fetch(`https://bug-tracker-ca.herokuapp.com/users`, {
+      headers: new Headers({
+        'x-api-email': 'alt@gmail.com',
+        'x-api-key': 'my super secret shared key',
+      }),
+    })
+      .then((response) => response.json())
+      .then((json) => setUsers(json));
+  }, []);
+
+  console.log(users);
   //Promise to fetch photos from unsplash API`
   React.useEffect(() => {
     if (county || city) {
@@ -131,7 +144,9 @@ export default function App() {
           {/* Currency tab with its respective props */}
           <Tab.Screen
             name="Currency"
-            children={() => <CurrencyTab currency={rates} geo={data} />}
+            children={() => (
+              <CurrencyTab currency={rates} users={users} geo={data} />
+            )}
           />
 
           {/* My Places tab with its respective props */}

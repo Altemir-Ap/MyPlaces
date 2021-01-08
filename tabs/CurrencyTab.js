@@ -1,11 +1,14 @@
 import React from 'react';
 import { StyleSheet, Text, View, TextInput, Button } from 'react-native';
+import { List } from 'react-native-paper';
+import { RadioButton } from 'react-native-paper';
 
 const CurrencyTab = (props) => {
   //Props variables
   const { results } = props.geo;
-  const { currency } = props;
-
+  const { currency, users } = props;
+  const [value, setValue] = React.useState('first');
+  const [data, setData] = React.useState('');
   //State variables
   const [total, setTotal] = React.useState(0);
   const [currencyStatus, setStatus] = React.useState(false);
@@ -53,6 +56,28 @@ const CurrencyTab = (props) => {
             : total.toFixed(2) + '$'
           : 'Please type a number'}
       </Text>
+
+      <View>
+        <List.AccordionGroup>
+          <View>
+            <Text>Users</Text>
+            <List.Accordion title="Accordion 3" id="3">
+              <RadioButton.Group
+                onValueChange={(value) => setValue(value)}
+                value={value}
+              >
+                {users.map((user) => (
+                  <RadioButton.Item
+                    label={user.name}
+                    value={user._id}
+                    key={user._id}
+                  />
+                ))}
+              </RadioButton.Group>
+            </List.Accordion>
+          </View>
+        </List.AccordionGroup>
+      </View>
     </View>
   );
 };
